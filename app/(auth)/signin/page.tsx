@@ -1,26 +1,73 @@
 "use client"
-import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+// import useNavigate 
 
 
 export default function signin(){
 
-  const [password,setPassword] = useState("");
-  const [email,setEmail] = useState("");
+  //[NOTE] when using useRouter hook inside app, import from "next/navigation" instead from "next/router" 
+  const router = useRouter(); 
 
+  // const [password,setPassword] = useState("");
+  // const [email,setEmail] = useState("");
+  const [user, setUser] = useState({
+      username: "",
+      email: "",
+      password: "",
+      
+  })
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  //const [loading, setLoading] = React.useState(false);
 
-  const collectData =async ()=>{
-    console.warn(email, password);
-
-    let result = await fetch('http://localhost:5000/signin',{
-      method: 'post',
-      body: JSON.stringify({email,password}),
-      headers:{
-        'Content-Type':'application/json'
+  const onSignup = async ()=>{
+      try 
+      {
+        //setLoading(true);
+        let result = await fetch('http://localhost:5000/signin',{
+        method: 'post',
+        body: JSON.stringify({
+          username: user.username,
+          email: user.email,
+          password: user.password
+      }),
+        headers:{
+          'Content-Type':'application/json'
       }
-    })
-    result = await result.json();
-    console.warn(result)
-  }
+      });
+
+       // Check if response is successful
+       if (!result.ok) {
+        // Handle server-side error
+        const errorData = await result.json();
+        throw new Error(errorData.message || 'Server error occurred');
+    }
+
+        console.log("Signup success", result);
+        result = await result.json();
+        localStorage.setItem("user@GEComm", JSON.stringify(result));
+        // router.push("/login");
+
+      } catch (error:any) 
+      {
+        console.log("Signup failed", error.message);
+        
+        //toast.error(error.message);
+      }
+      // finally {
+      //     setLoading(false);
+      // }
+    }
+
+
+    useEffect(() => {
+      if(user.email.length > 0 && user.password.length > 0 && user.username.length > 0) {
+          setButtonDisabled(false);
+      } else {
+          setButtonDisabled(true);
+      }
+  }, [user]);
 
 
     return(
@@ -29,15 +76,32 @@ export default function signin(){
           <img
             className="mx-auto h-10 w-auto"
             src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-            alt="Your Company"
+            alt="alt_company_image"
           />
           <h2 className="mt-2 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign in to your account
+            Sign in 
+            {/* to your account */}
           </h2>
         </div>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
           <form className="space-y-6" action="#" method="POST">
+          <div>
+              <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
+                Username
+              </label>
+              <div className="mt-2">
+                <input
+                  id="username"
+                  name="username"
+                  type="username"
+                  autoComplete="username"
+                  required
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  value={user.username}
+                  onChange={(e)=>setUser({...user, username: e.target.value})}/>
+              </div>
+            </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                 Email address
@@ -50,8 +114,8 @@ export default function signin(){
                   autoComplete="email"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={email}
-                  onChange={(e)=>setEmail(e.target.value)}/>
+                  value={user.email}
+                  onChange={(e)=>setUser({...user, email: e.target.value})}/>
               </div>
             </div>
 
@@ -62,7 +126,7 @@ export default function signin(){
                 </label>
                 <div className="text-sm">
                   <a href="#" className="font-semibold text-slate-600 hover:text-slate-500">
-                    Forgot password?
+                    Forgot password? to be removed
                   </a>
                 </div>
               </div>
@@ -74,8 +138,8 @@ export default function signin(){
                   autoComplete="current-password"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={password}
-                  onChange={(e)=>setPassword(e.target.value)}
+                  value={user.password}
+                  onChange={(e)=>setUser({...user, password: e.target.value})}
                 />
               </div>
             </div>
@@ -84,7 +148,7 @@ export default function signin(){
               <button
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600"
-                onClick={collectData}
+                onClick={onSignup}
                 >
                 Sign in
               </button>
@@ -92,10 +156,8 @@ export default function signin(){
           </form>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            Not a member?
-            <a href="#" className="font-semibold leading-6 text-slate-800 hover:text-slate-600">
-              Register here
-            </a>
+            Already a member?
+            <Link href={'/login'} className="font-semibold leading-6 text-slate-800 hover:text-slate-600">login</Link>
           </p>
         </div>
       </div>
