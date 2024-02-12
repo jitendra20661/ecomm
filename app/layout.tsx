@@ -3,6 +3,8 @@ import Footer from '@/components/Footer';
 import 'bootstrap/dist/css/bootstrap.css';
 import './globals.css'
 import Link from 'next/link';
+import toast, { Toaster } from "react-hot-toast"
+
 
 
 export const metadata = {
@@ -20,6 +22,7 @@ export default function RootLayout({
         <body>
           <div className='max-w-3xl mx-auto p-4'>
             <Navbar/>
+            <Toaster /> 
             {children}
             <Footer/>
           </div>

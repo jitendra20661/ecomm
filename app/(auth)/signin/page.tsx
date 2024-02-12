@@ -2,6 +2,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { FormEvent } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
+
+
 // import useNavigate 
 
 
@@ -10,64 +14,67 @@ export default function signin(){
   //[NOTE] when using useRouter hook inside app, import from "next/navigation" instead from "next/router" 
   const router = useRouter(); 
 
-  // const [password,setPassword] = useState("");
-  // const [email,setEmail] = useState("");
   const [user, setUser] = useState({
       username: "",
       email: "",
       password: "",
-      
   })
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  //const [loading, setLoading] = React.useState(false);
+  // const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const onSignup = async ()=>{
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget)
+    const username = formData.get('username')
+    const email = formData.get('email')
+    const password = formData.get('password')
       try 
       {
-        //setLoading(true);
-        let result = await fetch('http://localhost:5000/signin',{
-        method: 'post',
-        body: JSON.stringify({
-          username: user.username,
-          email: user.email,
-          password: user.password
-      }),
-        headers:{
-          'Content-Type':'application/json'
-      }
-      });
+        setLoading(true);
+        let result = await fetch('http://localhost:5000/signin', {
+          method: 'post',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({
+            username: user.username,
+            email: user.email,
+            password: user.password
+          }),
+        });
 
-       // Check if response is successful
-       if (!result.ok) {
-        // Handle server-side error
-        const errorData = await result.json();
-        throw new Error(errorData.message || 'Server error occurred');
-    }
+        //  Check if response is successful
+         if (!result.ok) {
+          // Handle server-side error
+          const errorData = await result.json();
+          throw new Error(errorData.message || 'Server error occurred');
+        }
 
-        console.log("Signup success", result);
         result = await result.json();
-        localStorage.setItem("user@GEComm", JSON.stringify(result));
-        // router.push("/login");
+        toast.success('Sign-up successful!');
+        console.log("Signup result: ", result);
+        // localStorage.setItem("user@GEComm", JSON.stringify(result));
+        router.push("/login");
 
       } catch (error:any) 
       {
         console.log("Signup failed", error.message);
-        
-        //toast.error(error.message);
+        toast.error(error.message);
       }
-      // finally {
-      //     setLoading(false);
-      // }
+      finally {
+          setLoading(false);
+      }
     }
 
 
-    useEffect(() => {
-      if(user.email.length > 0 && user.password.length > 0 && user.username.length > 0) {
-          setButtonDisabled(false);
-      } else {
-          setButtonDisabled(true);
-      }
-  }, [user]);
+  //   useEffect(() => {
+  //     if(user.email.length > 0 && user.password.length > 0 && user.username.length > 0) {
+  //         setButtonDisabled(false);
+  //     } else {
+  //         setButtonDisabled(true);
+  //     }
+  // }, [user]);
 
 
     return(
@@ -85,7 +92,7 @@ export default function signin(){
         </div>
 
         <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
               <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
                 Username
@@ -147,9 +154,7 @@ export default function signin(){
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600"
-                onClick={onSignup}
-                >
+                className="flex w-full justify-center rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600">
                 Sign in
               </button>
             </div>
