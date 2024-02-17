@@ -1,4 +1,4 @@
-export default function add_product(){
+export default function products(){
     return(
         <h1>sell product page</h1>
     )

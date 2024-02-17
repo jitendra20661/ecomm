@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 require('./db/config')
@@ -10,10 +11,10 @@ const cookieParser = require('cookie-parser');
 
 
 app.use(express.json());    
-app.use(cors());
 
 app.use(cors({
     origin: 'http://localhost:3000',        // must specify origin if using credentials(i.e COOKIES) in request headers
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     credentials: true
 }))
 app.use(cookieParser());
@@ -94,10 +95,10 @@ app.post("/login", async (req,res)=>{
 
         //create jwt token 
         const accessToken = generateAccessToken(userExist);
-        res.cookie('user@GEComm_token', accessToken, {
-            maxAge: 24 * 60 * 60 * 1000,
-            httpOnly: true
-        })
+        // res.cookie('user@GEComm_token', accessToken, {httpOnly: true})
+        // res.cookie('user@GEComm_token', "login", {httpOnly: true})
+        res.cookie('user@GEComm_token', accessToken, {httpOnly: true});
+
         // return res.status(200).json({message: 'Login Successful', token: accessToken})
         return res.status(200).json({message: 'Login Successful'})
 
@@ -108,7 +109,7 @@ app.post("/login", async (req,res)=>{
     }
 })
 
-
+// logout endpoint 
 app.get("/logout", async (req, res)=>{
     try {
         // console.log('incoming cookies: ', req.cookies);

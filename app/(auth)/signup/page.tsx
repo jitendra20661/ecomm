@@ -9,7 +9,7 @@ import toast, { Toaster } from 'react-hot-toast';
 // import useNavigate 
 
 
-export default function signin(){
+export default function signup(){
 
   //[NOTE] when using useRouter hook inside app, import from "next/navigation" instead from "next/router" 
   const router = useRouter(); 

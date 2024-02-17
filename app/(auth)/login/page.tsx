@@ -2,7 +2,8 @@
 import { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
- 
+// import { cookies } from 'next/headers'
+
 export default function LoginPage(){
   const router = useRouter()
  
@@ -16,8 +17,10 @@ export default function LoginPage(){
     try {
       let response = await fetch('http://localhost:5000/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
+
       })
    
       if (!response.ok) {
@@ -25,16 +28,18 @@ export default function LoginPage(){
         const errorData = await response.json();  //converts error obj to string
         throw new Error(errorData.message || 'Server error occurred');
       }
-      const result = await response.json();
+      // const result = await response.json();
       // localStorage.setItem("user@GEComm_token", response.message);  // put this in cookie maybe from backend
       // localStorage.setItem("user@GEComm_token", JSON.stringify(result.token));
-      toast.success('Login Success! Welcome.');
-      router.push('/')
-      
+      router.push("/");
+
+
     }catch (error:any) 
     {
       console.log("Login failed", error.message);
       toast.error(error.message);
+      // router.push("/login");
+
     }
     finally {
         // setLoading(false);
